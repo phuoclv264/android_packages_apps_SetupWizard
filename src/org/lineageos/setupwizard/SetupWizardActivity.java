@@ -60,6 +60,7 @@ public class SetupWizardActivity extends BaseSetupWizardActivity {
             }
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
+            SetupWizardUtils.finishSetupWizard(this);
             finish();
         }
     }
