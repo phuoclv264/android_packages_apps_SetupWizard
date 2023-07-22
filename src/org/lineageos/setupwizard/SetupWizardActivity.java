@@ -26,6 +26,7 @@ import static org.lineageos.setupwizard.SetupWizardApp.LOGV;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.google.android.setupcompat.util.WizardManagerHelper;
@@ -60,6 +61,7 @@ public class SetupWizardActivity extends BaseSetupWizardActivity {
             }
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
+            Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 1);
             SetupWizardUtils.finishSetupWizard(this);
             finish();
         }
