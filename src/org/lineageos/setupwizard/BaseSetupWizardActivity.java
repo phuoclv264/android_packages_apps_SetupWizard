@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The CyanogenMod Project
- *               2017-2022 The LineageOS Project
+ * Copyright (C) 2017-2020 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,19 @@
 package org.lineageos.setupwizard;
 
 import static android.view.View.INVISIBLE;
-
 import static com.google.android.setupcompat.util.ResultCodes.RESULT_ACTIVITY_NOT_FOUND;
 import static com.google.android.setupcompat.util.ResultCodes.RESULT_RETRY;
 import static com.google.android.setupcompat.util.ResultCodes.RESULT_SKIP;
 
-import static org.lineageos.setupwizard.SetupWizardApp.ACTION_ACCESSIBILITY_SETTINGS;
 import static org.lineageos.setupwizard.SetupWizardApp.ACTION_EMERGENCY_DIAL;
 import static org.lineageos.setupwizard.SetupWizardApp.ACTION_NEXT;
 import static org.lineageos.setupwizard.SetupWizardApp.ACTION_SETUP_COMPLETE;
 import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_ACTION_ID;
+import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_FIRST_RUN;
 import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_HAS_MULTIPLE_USERS;
 import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_RESULT_CODE;
 import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_SCRIPT_URI;
+import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_USE_IMMERSIVE;
 import static org.lineageos.setupwizard.SetupWizardApp.LOGV;
 
 import android.annotation.NonNull;
@@ -48,24 +48,26 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.android.settingslib.Utils;
-
+import com.google.android.setupdesign.view.NavigationBar;
+import com.google.android.setupdesign.view.NavigationBar.NavigationBarListener;
+import com.google.android.setupcompat.util.SystemBarHelper;
 import com.google.android.setupcompat.util.WizardManagerHelper;
-import com.google.android.setupdesign.GlifLayout;
 
-import org.lineageos.setupwizard.NavigationLayout.NavigationBarListener;
 import org.lineageos.setupwizard.util.SetupWizardUtils;
 
 import java.util.List;
 
-public abstract class BaseSetupWizardActivity extends Activity implements NavigationBarListener {
+public abstract class BaseSetupWizardActivity extends Activity implements NavigationBarListener,
+        ViewTreeObserver.OnPreDrawListener {
 
     public static final String TAG = BaseSetupWizardActivity.class.getSimpleName();
 
@@ -76,22 +78,24 @@ public abstract class BaseSetupWizardActivity extends Activity implements Naviga
 
     protected static final int NEXT_REQUEST = 10000;
     protected static final int EMERGENCY_DIAL_ACTIVITY_REQUEST = 10038;
-    protected static final int ACCESSIBILITY_SETTINGS_ACTIVITY_REQUEST = 10039;
     protected static final int WIFI_ACTIVITY_REQUEST = 10004;
     protected static final int BLUETOOTH_ACTIVITY_REQUEST = 10100;
     protected static final int BIOMETRIC_ACTIVITY_REQUEST = 10101;
     protected static final int SCREENLOCK_ACTIVITY_REQUEST = 10102;
 
-    private NavigationLayout mNavigationBar;
+    private static final int IMMERSIVE_FLAGS =
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+    private int mSystemUiFlags = IMMERSIVE_FLAGS | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+
+    private NavigationBar mNavigationBar;
 
     protected boolean mIsActivityVisible = false;
     protected boolean mIsExiting = false;
-    private final boolean mIsFirstRun = true;
+    private boolean mIsFirstRun = true;
     protected boolean mIsGoingBack = false;
     private boolean mIsPrimaryUser;
     protected int mResultCode = 0;
     private Intent mResultData;
-
     private final BroadcastReceiver finishReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -117,6 +121,16 @@ public abstract class BaseSetupWizardActivity extends Activity implements Naviga
         mNavigationBar = getNavigationBar();
         if (mNavigationBar != null) {
             mNavigationBar.setNavigationBarListener(this);
+            mNavigationBar.addOnLayoutChangeListener((View view,
+                    int left, int top, int right, int bottom,
+                    int oldLeft, int oldTop, int oldRight, int oldBottom) -> {
+                view.requestApplyInsets();
+            });
+            mNavigationBar.setSystemUiVisibility(mSystemUiFlags);
+            // Set the UI flags before draw because the visibility might change in unexpected /
+            // undetectable times, like transitioning from a finishing activity that had a keyboard
+            ViewTreeObserver viewTreeObserver = mNavigationBar.getViewTreeObserver();
+            viewTreeObserver.addOnPreDrawListener(this);
         }
     }
 
@@ -211,13 +225,71 @@ public abstract class BaseSetupWizardActivity extends Activity implements Naviga
         }
     }
 
+    @Override
+    public boolean onPreDraw() {
+        // View.setSystemUiVisibility checks if the visibility changes before applying them
+        // so the performance impact is contained
+        mNavigationBar.setSystemUiVisibility(mSystemUiFlags);
+        return true;
+    }
+
     /**
      * @return The navigation bar instance in the layout, or null if the layout does not have a
-     * navigation bar.
+     *     navigation bar.
      */
-    public NavigationLayout getNavigationBar() {
+    public NavigationBar getNavigationBar() {
         final View view = findViewById(R.id.navigation_bar);
-        return view instanceof NavigationLayout ? (NavigationLayout) view : null;
+        return view instanceof NavigationBar ? (NavigationBar) view : null;
+    }
+
+    /**
+     * Sets whether system navigation bar should be hidden.
+     * @param useImmersiveMode True to activate immersive mode and hide the system navigation bar
+     */
+    public void setUseImmersiveMode(boolean useImmersiveMode) {
+        // By default, enable layoutHideNavigation if immersive mode is used
+        setUseImmersiveMode(useImmersiveMode, useImmersiveMode);
+    }
+
+    public void setUseImmersiveMode(boolean useImmersiveMode, boolean layoutHideNavigation) {
+        if (useImmersiveMode) {
+            mSystemUiFlags |= IMMERSIVE_FLAGS;
+            if (layoutHideNavigation) {
+                mSystemUiFlags |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+            }
+        } else {
+            mSystemUiFlags &= ~(IMMERSIVE_FLAGS | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        }
+        if (mNavigationBar != null) {
+            mNavigationBar.setSystemUiVisibility(mSystemUiFlags);
+        }
+    }
+
+    protected void setBackDrawable(Drawable drawable) {
+        if (mNavigationBar != null) {
+            mNavigationBar.getBackButton().setCompoundDrawables(drawable, null, null, null);
+        }
+    }
+
+    protected void setNextDrawable(Drawable drawable) {
+        if (mNavigationBar != null) {
+            mNavigationBar.getBackButton().setCompoundDrawables(null, null, drawable, null);
+        }
+    }
+
+    public void setBackAllowed(boolean allowed) {
+        SystemBarHelper.setBackButtonVisible(getWindow(), allowed);
+        if (mNavigationBar != null) {
+            Button backButton = mNavigationBar.getBackButton();
+            backButton.setEnabled(allowed);
+        }
+    }
+
+    protected boolean isBackAllowed() {
+        if (mNavigationBar != null) {
+            mNavigationBar.getBackButton().isEnabled();
+        }
+        return false;
     }
 
     public void setNextAllowed(boolean allowed) {
@@ -237,23 +309,15 @@ public abstract class BaseSetupWizardActivity extends Activity implements Naviga
         nextAction(NEXT_REQUEST);
     }
 
-    protected void onSkipPressed() {
-        nextAction(NEXT_REQUEST);
-    }
-
     protected void setNextText(int resId) {
         if (mNavigationBar != null) {
             mNavigationBar.getNextButton().setText(resId);
         }
     }
 
-    public Button getNextButton() {
-        return mNavigationBar.getNextButton();
-    }
-
-    protected void setSkipText(int resId) {
+    protected void setBackText(int resId) {
         if (mNavigationBar != null) {
-            mNavigationBar.getSkipButton().setText(resId);
+            mNavigationBar.getBackButton().setText(resId);
         }
     }
 
@@ -287,10 +351,6 @@ public abstract class BaseSetupWizardActivity extends Activity implements Naviga
         onNextPressed();
     }
 
-    public void onSkip() {
-        onSkipPressed();
-    }
-
     protected void startEmergencyDialer() {
         try {
             startFirstRunActivityForResult(new Intent(ACTION_EMERGENCY_DIAL),
@@ -301,22 +361,13 @@ public abstract class BaseSetupWizardActivity extends Activity implements Naviga
         }
     }
 
-    protected void startAccessibilitySettings() {
-        try {
-            Intent intent = new Intent(ACTION_ACCESSIBILITY_SETTINGS);
-            intent.putExtra(WizardManagerHelper.EXTRA_IS_SETUP_FLOW, true);
-            startFirstRunActivityForResult(intent, ACCESSIBILITY_SETTINGS_ACTIVITY_REQUEST);
-            applyForwardTransition(TRANSITION_ID_DEFAULT);
-        } catch (ActivityNotFoundException e) {
-            Log.e(TAG, "Can't find the accessibility settings: " +
-                    "android.settings.ACCESSIBILITY_SETTINGS_FOR_SUW");
-        }
-    }
-
     protected void onSetupStart() {
         SetupWizardUtils.disableCaptivePortalDetection(getApplicationContext());
+        SetupWizardUtils.disableStatusBar(getApplicationContext());
+        SystemBarHelper.hideSystemBars(getWindow());
         tryEnablingWifi();
     }
+
 
     protected void exitIfSetupComplete() {
         if (WizardManagerHelper.isUserSetupComplete(this)) {
@@ -347,8 +398,7 @@ public abstract class BaseSetupWizardActivity extends Activity implements Naviga
         }
         mIsGoingBack = true;
         if (requestCode != NEXT_REQUEST || resultCode != RESULT_CANCELED) {
-            if (requestCode == EMERGENCY_DIAL_ACTIVITY_REQUEST |
-                    requestCode == ACCESSIBILITY_SETTINGS_ACTIVITY_REQUEST) {
+            if (requestCode == EMERGENCY_DIAL_ACTIVITY_REQUEST) {
                 applyBackwardTransition(TRANSITION_ID_DEFAULT);
                 return;
             }
@@ -470,12 +520,21 @@ public abstract class BaseSetupWizardActivity extends Activity implements Naviga
         } else if (transitionId == TRANSITION_ID_DEFAULT) {
             TypedArray typedArray = obtainStyledAttributes(android.R.style.Animation_Activity,
                     new int[]{android.R.attr.activityCloseEnterAnimation,
-                            android.R.attr.activityCloseExitAnimation});
+                    android.R.attr.activityCloseExitAnimation});
             overridePendingTransition(typedArray.getResourceId(0, 0),
                     typedArray.getResourceId(1, 0));
             typedArray.recycle();
         } else if (transitionId == TRANSITION_ID_NONE) {
             overridePendingTransition(0, 0);
+        }
+    }
+
+    protected void hideBackButton() {
+        if (mNavigationBar != null) {
+            Animation fadeOut = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+            final Button back = mNavigationBar.getBackButton();
+            back.startAnimation(fadeOut);
+            back.setVisibility(INVISIBLE);
         }
     }
 
@@ -502,8 +561,9 @@ public abstract class BaseSetupWizardActivity extends Activity implements Naviga
         if (LOGV) {
             Log.v(TAG, "starting activity " + intent);
         }
-        intent.putExtra(WizardManagerHelper.EXTRA_IS_FIRST_RUN, isFirstRun());
+        intent.putExtra(EXTRA_FIRST_RUN, isFirstRun());
         intent.putExtra(EXTRA_HAS_MULTIPLE_USERS, hasMultipleUsers());
+        intent.putExtra(EXTRA_USE_IMMERSIVE, true);
         startActivity(intent);
     }
 
@@ -511,10 +571,12 @@ public abstract class BaseSetupWizardActivity extends Activity implements Naviga
         if (LOGV) {
             Log.v(TAG, "startFirstRunActivityForResult requestCode=" + requestCode);
         }
-        intent.putExtra(WizardManagerHelper.EXTRA_IS_FIRST_RUN, isFirstRun());
+        intent.putExtra(EXTRA_FIRST_RUN, isFirstRun());
         intent.putExtra(EXTRA_HAS_MULTIPLE_USERS, hasMultipleUsers());
+        intent.putExtra(EXTRA_USE_IMMERSIVE, true);
         startActivityForResult(intent, requestCode);
     }
+
 
     protected boolean isFirstRun() {
         return mIsFirstRun;
@@ -647,19 +709,14 @@ public abstract class BaseSetupWizardActivity extends Activity implements Naviga
             setContentView(getLayoutResId());
         }
         if (getTitleResId() != -1) {
-            final CharSequence headerText = TextUtils.expandTemplate(getText(getTitleResId()));
-            getGlifLayout().setHeaderText(headerText);
+            TextView title = (TextView) findViewById(android.R.id.title);
+            title.setText(getTitleResId());
         }
         if (getIconResId() != -1) {
-            final GlifLayout layout = getGlifLayout();
-            final Drawable icon = getDrawable(getIconResId()).mutate();
-            icon.setTintList(Utils.getColorAccent(layout.getContext()));
-            layout.setIcon(icon);
+            ImageView icon = (ImageView) findViewById(R.id.header_icon);
+            icon.setImageResource(getIconResId());
+            icon.setVisibility(View.VISIBLE);
         }
-    }
-
-    protected GlifLayout getGlifLayout() {
-        return requireViewById(R.id.setup_wizard_layout);
     }
 
     protected int getLayoutResId() {

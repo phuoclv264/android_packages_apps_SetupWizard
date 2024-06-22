@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The CyanogenMod Project
- *               2017-2022 The LineageOS Project
+ * Copyright (C) 2017-2018,2020 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,16 +30,14 @@ import android.os.Handler;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.NumberPicker;
 import android.widget.Toast;
 
+import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.telephony.util.LocaleUtils;
 
-import com.google.android.setupcompat.util.SystemBarHelper;
-
+import org.lineageos.setupwizard.R;
 import org.lineageos.setupwizard.widget.LocalePicker;
 
 import java.util.List;
@@ -76,19 +74,12 @@ public class LocaleActivity extends BaseSetupWizardActivity {
         }
     };
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SystemBarHelper.setBackButtonVisible(getWindow(), true);
         setNextText(R.string.next);
         mLanguagePicker = (LocalePicker) findViewById(R.id.locale_list);
-        mLanguagePicker.setNextRight(getNextButton().getId());
-        mLanguagePicker.requestFocus();
-        if (getResources().getBoolean(R.bool.config_isLargeNoTouch)) {
-            mLanguagePicker.setOnClickListener((View v) -> {
-                getNextButton().performClick();
-            });
-        }
         loadLanguages();
     }
 
@@ -136,8 +127,8 @@ public class LocaleActivity extends BaseSetupWizardActivity {
         fetchAndUpdateSimLocale();
         mAdapterIndices = new int[mLocaleAdapter.getCount()];
         int currentLocaleIndex = 0;
-        String[] labels = new String[mLocaleAdapter.getCount()];
-        for (int i = 0; i < mAdapterIndices.length; i++) {
+        String [] labels = new String[mLocaleAdapter.getCount()];
+        for (int i=0; i<mAdapterIndices.length; i++) {
             com.android.internal.app.LocalePicker.LocaleInfo localLocaleInfo =
                     mLocaleAdapter.getItem(i);
             Locale localLocale = localLocaleInfo.getLocale();
@@ -155,13 +146,13 @@ public class LocaleActivity extends BaseSetupWizardActivity {
 
         mLanguagePicker.setOnScrollListener((view, scrollState) -> {
             if (scrollState == NumberPicker.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                ((SetupWizardApp) getApplication()).setIgnoreSimLocale(true);
+                ((SetupWizardApp)getApplication()).setIgnoreSimLocale(true);
             }
         });
     }
 
     private void setLocaleFromPicker() {
-        ((SetupWizardApp) getApplication()).setIgnoreSimLocale(true);
+        ((SetupWizardApp)getApplication()).setIgnoreSimLocale(true);
         int i = mAdapterIndices[mLanguagePicker.getValue()];
         final com.android.internal.app.LocalePicker.LocaleInfo localLocaleInfo =
                 mLocaleAdapter.getItem(i);
@@ -182,7 +173,7 @@ public class LocaleActivity extends BaseSetupWizardActivity {
     }
 
     private void fetchAndUpdateSimLocale() {
-        if (((SetupWizardApp) getApplication()).ignoreSimLocale() || isDestroyed()) {
+        if (((SetupWizardApp)getApplication()).ignoreSimLocale() || isDestroyed()) {
             return;
         }
         if (mPaused) {
@@ -206,7 +197,7 @@ public class LocaleActivity extends BaseSetupWizardActivity {
                 TelephonyManager telephonyManager = (TelephonyManager)
                         activity.getSystemService(Context.TELEPHONY_SERVICE);
                 int state = telephonyManager.getSimState();
-                if (state == TelephonyManager.SIM_STATE_PIN_REQUIRED ||
+                if(state == TelephonyManager.SIM_STATE_PIN_REQUIRED ||
                         state == TelephonyManager.SIM_STATE_PUK_REQUIRED) {
                     return null;
                 }
@@ -221,7 +212,7 @@ public class LocaleActivity extends BaseSetupWizardActivity {
 
                 // Fetch locale for active sim's MCC
                 int mcc = activeSubs.get(0).getMcc();
-                locale = LocaleUtils.getLocaleFromMcc(activity, mcc, null);
+                locale = MccTable.getLocaleFromMcc(activity, mcc, null);
 
                 // If that fails, fall back to preferred languages reported
                 // by the sim
@@ -239,12 +230,12 @@ public class LocaleActivity extends BaseSetupWizardActivity {
         @Override
         protected void onPostExecute(Locale simLocale) {
             if (simLocale != null && !simLocale.equals(mCurrentLocale)) {
-                if (!((SetupWizardApp) getApplication()).ignoreSimLocale() && !isDestroyed()) {
+                if (!((SetupWizardApp)getApplication()).ignoreSimLocale() && !isDestroyed()) {
                     String label = getString(R.string.sim_locale_changed,
                             simLocale.getDisplayName());
                     Toast.makeText(LocaleActivity.this, label, Toast.LENGTH_SHORT).show();
                     onLocaleChanged(simLocale);
-                    ((SetupWizardApp) getApplication()).setIgnoreSimLocale(true);
+                    ((SetupWizardApp)getApplication()).setIgnoreSimLocale(true);
                 }
             }
         }

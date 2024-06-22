@@ -1,3 +1,5 @@
+package org.lineageos.setupwizard;
+
 /*
  * Copyright (C) 2016 The CyanogenMod Project
  *
@@ -13,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.lineageos.setupwizard;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

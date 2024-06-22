@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The CyanogenMod Project
- *               2017-2022 The LineageOS Project
+ * Copyright (C) 2017-2018,2020 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,22 @@
 package org.lineageos.setupwizard;
 
 import static org.lineageos.setupwizard.SetupWizardApp.ACTION_SETUP_BIOMETRIC;
+import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_ALLOW_SKIP;
+import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_AUTO_FINISH;
 import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_DETAILS;
+import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_FIRST_RUN;
+import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_MATERIAL_LIGHT;
+import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_THEME;
 import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_TITLE;
+import static org.lineageos.setupwizard.SetupWizardApp.EXTRA_USE_IMMERSIVE;
 import static org.lineageos.setupwizard.SetupWizardApp.REQUEST_CODE_SETUP_BIOMETRIC;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.setupcompat.util.WizardManagerHelper;
-import com.google.android.setupdesign.util.ThemeHelper;
 
 import org.lineageos.setupwizard.util.SetupWizardUtils;
 
@@ -38,8 +44,7 @@ public class BiometricActivity extends SubBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final TextView setupBiometricSummary = (TextView) findViewById(
-                R.id.setup_biometric_summary);
+        final TextView setupBiometricSummary = (TextView) findViewById(R.id.setup_biometric_summary);
         final TextView setupAddBiometric = (TextView) findViewById(R.id.setup_add_biometric);
         if (SetupWizardUtils.hasFace(this)) {
             setupBiometricSummary.setText(getString(R.string.face_setup_summary));
@@ -51,13 +56,9 @@ public class BiometricActivity extends SubBaseActivity {
     }
 
     @Override
-    protected void onNextPressed() {
-        launchBiometricSetup();
-    }
-
-    @Override
     protected void onStartSubactivity() {
         setNextAllowed(true);
+        findViewById(R.id.setup_biometric).setOnClickListener(view -> launchBiometricSetup());
     }
 
     @Override
@@ -83,6 +84,12 @@ public class BiometricActivity extends SubBaseActivity {
 
     private void launchBiometricSetup() {
         Intent intent = new Intent(ACTION_SETUP_BIOMETRIC);
+        intent.putExtra(EXTRA_FIRST_RUN, true);
+        intent.putExtra(EXTRA_ALLOW_SKIP, true);
+        intent.putExtra(EXTRA_USE_IMMERSIVE, true);
+        intent.putExtra(EXTRA_THEME, EXTRA_MATERIAL_LIGHT);
+        intent.putExtra(EXTRA_AUTO_FINISH, false);
+            /*intent.putExtra(LockPatternUtils.LOCKSCREEN_BIOMETRIC_FALLBACK, true);*/
         intent.putExtra(EXTRA_TITLE,
                 getString(getTitleResId()));
         intent.putExtra(EXTRA_DETAILS,

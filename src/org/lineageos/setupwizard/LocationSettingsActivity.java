@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The CyanogenMod Project
- * Copyright (C) 2017-2021 The LineageOS Project
+ * Copyright (C) 2017-2020 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,10 @@ import android.os.Bundle;
 import android.os.UserHandle;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.TextView;
+import android.provider.Settings;
+
+import org.lineageos.setupwizard.util.SetupWizardUtils;
 
 public class LocationSettingsActivity extends BaseSetupWizardActivity {
 
@@ -37,14 +41,19 @@ public class LocationSettingsActivity extends BaseSetupWizardActivity {
         super.onCreate(savedInstanceState);
         setNextText(R.string.next);
 
+        TextView summaryView = (TextView) findViewById(android.R.id.summary);
+        summaryView.setText(R.string.location_services_summary);
+
         mLocationAccess = (CheckBox) findViewById(R.id.location_checkbox);
         mLocationManager = getSystemService(LocationManager.class);
         View locationAccessView = findViewById(R.id.location);
         locationAccessView.setOnClickListener(v -> {
             mLocationManager.setLocationEnabledForUser(!mLocationAccess.isChecked(),
-                    new UserHandle(UserHandle.USER_CURRENT));
+                        new UserHandle(UserHandle.USER_CURRENT));
             mLocationAccess.setChecked(!mLocationAccess.isChecked());
         });
+        Settings.Global.putInt(getContentResolver(),
+                    Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,1);
     }
 
     @Override

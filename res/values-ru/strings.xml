@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
      Copyright (C) 2013-2015 The CyanogenMod Project
-     Copyright (C) 2017-2020, 2022 The LineageOS Project
+     Copyright (C) 2017-2020 The LineageOS Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
      See the License for the specific language governing permissions and
      limitations under the License.
--->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+--><resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Мастер настройки</string>
     <string name="next">Далее</string>
     <string name="skip">Пропустить</string>
     <string name="start">Начать</string>
     <string name="done">Готово</string>
     <string name="ok">ОК</string>
-    <string name="loading">Секунду\u2026</string>
+    <string name="loading">Секунду…</string>
     <string name="setup_complete">Настройка завершена</string>
-    <string name="setup_welcome">Добро пожаловать!</string>
-    <string name="setup_welcome_message">Добро пожаловать в <xliff:g id="name" example="LineageOS">%1$s</xliff:g></string>
+    <string name="setup_welcome">Добро пожаловать</string>
     <string name="setup_locale">Язык</string>
     <string name="setup_wifi">Выбрать сеть Wi-Fi</string>
     <string name="setup_sim_missing">Нет SIM-карты</string>
@@ -40,6 +38,9 @@
     <string name="choose_data_sim_summary" product="tablet">Какую SIM-карту использовать для передачи данных? Выбранная SIM-карта может повлечь расходы за сетевое подключение, так как она будет использоваться для настройки планшета.</string>
     <string name="choose_data_sim_summary" product="default">Какую SIM-карту использовать для передачи данных? Выбранная SIM-карта может повлечь расходы за сетевое подключение, так как она будет использоваться для настройки телефона.</string>
     <string name="date_time_summary">Установите свой часовой пояс и при необходимости скорректируйте текущую дату и время</string>
+    <string name="backup_data_summary"><b>Сохранять</b> данные приложений, пароли Wi-Fi и другие параметры на серверах Google</string>
+    <string name="other_services_summary">Эти службы обеспечивают работу Google, и вы можете включить или выключить их в любое время. Данные будут использоваться в соответствии с <xliff:g id="name" example="Privacy Policy">%s</xliff:g> Google.</string>
+    <string name="location_services_summary">Службы определения местоположения позволяют системным и сторонним приложениям собирать и использовать данные о вашем приблизительном местоположении. Например, приложение может использовать ваше местоположение для поиска ближайших кофеен.</string>
     <string name="location_access_summary"><b>Разрешить приложениям, запросившим ваше разрешение</b>, использовать информацию о вашем местоположении. Это может включать ваше текущее и прошлые местоположения.</string>
     <string name="setup_mobile_data">Включить передачу данных</string>
     <string name="setup_mobile_data_no_service">Нет сети</string>
@@ -49,14 +50,17 @@
     <string name="yes">Да</string>
     <string name="data_sim_name">SIM <xliff:g id="sub">%1$d</xliff:g> - <xliff:g id="name">%2$s</xliff:g></string>
     <string name="emergency_call">Экстренный вызов</string>
-    <string name="accessibility_settings">Настройки специальных возможностей</string>
     <string name="setup_services">Возможности LineageOS</string>
-    <string name="services_pp_explanation">Эти службы работают, чтобы расширить возможности вашего устройства. Данные будут использоваться в соответствии с политикой конфиденциальности <xliff:g id="name" example="LineageOS">%1$s</xliff:g>.</string>
-    <string name="services_find_privacy_policy">Вы можете ознакомиться с политикой конфиденциальности на другом устройстве, посетив <xliff:g id="uri" example="https://lineageos.org/legal">%1$s</xliff:g></string>
+    <string name="services_explanation" product="tablet">Эти сервисы предназначены для расширения возможностей вашего планшета. Данные будут использоваться в соответствии с <xliff:g id="name" example="Privacy Policy">%s</xliff:g> LineageOS.</string>
+    <string name="services_explanation" product="default">Эти сервисы предназначены для расширения возможностей вашего телефона. Данные будут использоваться в соответствии с <xliff:g id="name" example="Privacy Policy">%s</xliff:g> LineageOS.</string>
+    <string name="services_privacy_policy">политикой конфиденциальности</string>
     <string name="services_help_improve_cm">Помочь улучшить <xliff:g id="name" example="LineageOS">%s</xliff:g></string>
-    <string name="services_metrics_label"><xliff:g id="name" example="Help improve LineageOS">%1$s</xliff:g>, разрешив отправку данных диагностики и использования в <xliff:g id="name" example="LineageOS">%2$s</xliff:g>. Эта информация не может быть использована для идентификации вашей личности и поможет в работе над повышением автономности, производительности и новыми возможностями <xliff:g id="name" example="LineageOS">%3$s</xliff:g>.</string>
+    <string name="services_metrics_label"><xliff:g id="name" example="Help improve LineageOS">%1$s</xliff:g>, разрешив отправку данных диагностики и использования в LineageOS. Эта информация не может быть использована для вашей идентификации и поможет в работе над повышением автономности, производительности и новыми возможностями <xliff:g id="name" example="LineageOS">%2$s</xliff:g>.</string>
     <string name="services_os_nav_keys_label"><b>Использовать экранные навигационные кнопки</b> вместо аппаратных.</string>
-    <string name="services_full_description"><xliff:g id="pp_explanation">%1$s</xliff:g>\n<xliff:g id="pp_find">%2$s</xliff:g></string>
+    <string name="setup_unlock">Разблокировать</string>
+    <string name="setup_device_locked">Устройство заблокировано пользователем.</string>
+    <string name="setup_require_cyanogen_label"><b>Требовать пароль входа в аккаунт</b> для использования устройства даже после сброса настроек.</string>
+    <string name="setup_device_locked_instructions"><i>Чтобы включить или отключить эту функцию, перейдите в меню \'Настройки &gt; Безопасность\'</i></string>
     <string name="settings_biometric_setup_title">Выберите запасной режим блокировки экрана</string>
     <string name="settings_biometric_setup_details">Как следует блокировать экран?</string>
     <string name="fingerprint_setup_title">Настройка отпечатков пальцев</string>
@@ -75,18 +79,11 @@
     <string name="lockscreen_setup_summary"><b>Защитить это устройство</b> и запрашивать PIN-код, графический ключ или пароль для разблокировки экрана</string>
     <string name="lockscreen_setup_screen_lock_setup">Настройка</string>
     <string name="intro_restore_title">Восстановить приложения и данные</string>
-    <string name="intro_restore_subtitle" product="tablet">Если у вас есть резервная копия с вашего последнего планшета с <xliff:g id="name" example="LineageOS">%s</xliff:g>, вы можете восстановить ее здесь.</string>
-    <string name="intro_restore_subtitle" product="default">Если у вас есть резервная копия с вашего последнего телефона с <xliff:g id="name" example="LineageOS">%s</xliff:g>, вы можете восстановить ее здесь.</string>
+    <string name="intro_restore_subtitle" product="tablet">Если у вас есть резервная копия, сделанная на другом планшете с LineageOS, вы можете восстановить ее здесь.</string>
+    <string name="intro_restore_subtitle" product="default">Если у вас есть резервная копия, сделанная на другом телефоне с LineageOS, вы можете восстановить ее здесь.</string>
     <string name="intro_restore_button">Восстановить из резервной копии</string>
-    <string name="update_recovery_title">Обновление Lineage Recovery</string>
-    <string name="update_recovery_description">Обновление Lineage Recovery при первом запуске после каждого обновления ОС.</string>
-    <string name="update_recovery_warning">Recovery будет обновлен по завершении установки. Если вы хотите оставить его без изменений, отключите эту функцию.</string>
-    <string name="update_recovery_setting">Обновить Lineage Recovery  вместе с ОС</string>
-    <string name="update_recovery_full_description"><xliff:g id="recovery_update_description">%1$s</xliff:g>\n<xliff:g id="recovery_update_warning">%2$s</xliff:g></string>
-    <string name="setup_navigation">Навигация</string>
-    <string name="navigation_summary">Выберите предпочтительный метод навигации</string>
-    <string name="gesture_navigation">Навигация жестами</string>
-    <string name="two_button_navigation">Навигация двумя кнопками</string>
-    <string name="navbar_navigation">Навигация тремя кнопками</string>
-    <string name="hide_gesture_hint">Скрыть подсказку навигации жестами</string>
+    <string name="e_account_manager_setup_configure">Войти</string>
+    <string name="e_account_manager_setup_title">Синхронизируйте свою облачную учётную запись</string>
+    <string name="e_account_manager_setup_summary">Войдите в систему с помощью e.email или murena.io ID , чтобы подключить свою личную учётную запись к этому телефону. Это позволит синхронизировать электронную почту, контакты, события календаря, изображения, видео, заметки и задачи между этим телефоном и вашим личным облаком.</string>
+    <string name="create_account">Создать учётную запись</string>
 </resources>

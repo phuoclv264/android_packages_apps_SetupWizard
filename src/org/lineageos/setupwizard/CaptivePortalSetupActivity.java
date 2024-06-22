@@ -21,7 +21,9 @@ import static org.lineageos.setupwizard.SetupWizardApp.REQUEST_CODE_SETUP_CAPTIV
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.CaptivePortal;
 import android.net.ConnectivityManager;
+import android.net.ICaptivePortal;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -66,8 +68,7 @@ public class CaptivePortalSetupActivity extends WrapperSubBaseActivity {
         }
 
         public static void checkForCaptivePortal(URL captivePortalUrl,
-                CaptivePortalSetupActivity captivePortalSetupActivity,
-                boolean cancelAndRecreateIfRunning) {
+                CaptivePortalSetupActivity captivePortalSetupActivity, boolean cancelAndRecreateIfRunning) {
             if (sTask == null || sTask.getStatus() == Status.FINISHED) {
                 sTask = new CheckForCaptivePortalTask(captivePortalUrl, captivePortalSetupActivity);
                 sTask.execute();
@@ -116,14 +117,23 @@ public class CaptivePortalSetupActivity extends WrapperSubBaseActivity {
                 final Intent intent = new Intent(
                         ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN);
                 intent.putExtra(Intent.EXTRA_TEXT, responseToken);
+                intent.putExtra(ConnectivityManager.EXTRA_NETWORK,
+                        ConnectivityManager.from(context)
+                                .getNetworkForType(ConnectivityManager.TYPE_WIFI));
+                intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL,
+                        new CaptivePortal(new ICaptivePortal.Stub() {
+                            @Override
+                            public void appResponse(int response) {}
+                            @Override
+                            public void logEvent(int eventId, String packageName) {}
+                        }));
                 intent.putExtra("status_bar_color",
                         context.getResources().getColor(R.color.primary_dark));
                 intent.putExtra("action_bar_color", context.getResources().getColor(
                         R.color.primary_dark));
                 intent.putExtra("progress_bar_color", context.getResources().getColor(
                         R.color.accent));
-                captivePortalSetupActivity.startSubactivity(intent,
-                        REQUEST_CODE_SETUP_CAPTIVE_PORTAL);
+                captivePortalSetupActivity.startSubactivity(intent, REQUEST_CODE_SETUP_CAPTIVE_PORTAL);
             } else {
                 captivePortalSetupActivity.finishAction(RESULT_OK);
                 captivePortalSetupActivity.finish();

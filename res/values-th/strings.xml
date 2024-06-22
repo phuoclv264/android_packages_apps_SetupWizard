@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
      Copyright (C) 2013-2015 The CyanogenMod Project
-     Copyright (C) 2017-2020, 2022 The LineageOS Project
+     Copyright (C) 2017-2020 The LineageOS Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -39,6 +39,9 @@
     <string name="choose_data_sim_summary" product="tablet">กรุณาเลือกซิมการ์ดที่ต้องการใช้ข้อมูล ซิมที่เลือกอาจมีค่าบริการเครือข่ายเนื่องจากซิมดังกล่าวจะใช้ในการตั้งค่าแท็บเล็ตของคุณ</string>
     <string name="choose_data_sim_summary" product="default">กรุณาเลือกซิมการ์ดที่ต้องการใช้ข้อมูล ซิมที่เลือกอาจมีค่าบริการเครือข่าย เนื่องจากซิมดังกล่าวจะใช้ในการตั้งค่าโทรศัพท์ของคุณ</string>
     <string name="date_time_summary">ตั้งค่าเขตเวลาและวันที่ของคุณหากคุณต้องการ</string>
+    <string name="backup_data_summary"><b>สำรอง</b>ข้อมูลแอป รหัสผ่าน Wi-Fi และการตั้งค่าอื่น ๆ ไปยังเซิร์ฟเวอร์ของ Google</string>
+    <string name="other_services_summary">บริการเหล่านี้ทำให้ Google ทำงานเพื่อคุณ คุณสามารถเปิดหรือปิดบริการเหล่านั้นได้เสมอ โดยจะใช้ข้อมูลตาม <xliff:g id="name" example="Privacy Policy">%s</xliff:g> ของ Google</string>
+    <string name="location_services_summary">บริการตำแหน่งที่ตั้งอนุญาตให้ระบบและแอปบุคคลที่สามเก็บและใช้ข้อมูล เช่น ตำแหน่งที่ตั้งของคุณได้ เช่น แอปสามารถใช้ตำแหน่งที่ตั้งของคุณเพื่อหาร้านกาแฟใกล้เคียง</string>
     <string name="location_access_summary"><b>อนุญาตให้แอปที่ขออนุญาต</b> ใช้ข้อมูลตำแหน่งที่ตั้งของคุณ ซึ่งอาจรวมถึงตำแหน่งที่ตั้งปัจจุบันและที่ผ่านมา</string>
     <string name="setup_mobile_data">เปิดข้อมูลโทรศัพท์มือถือ</string>
     <string name="setup_mobile_data_no_service">ไม่มีบริการ</string>
@@ -48,10 +51,17 @@
     <string name="yes">ใช่</string>
     <string name="data_sim_name">ซิม <xliff:g id="sub">%1$d</xliff:g> - <xliff:g id="name">%2$s</xliff:g></string>
     <string name="emergency_call">โทรฉุกเฉิน</string>
-    <string name="accessibility_settings">การตั้งค่าการเข้าถึง</string>
     <string name="setup_services">คุณสมบัติ LineageOS</string>
+    <string name="services_explanation" product="tablet">บริการเหล่านี้ช่วยให้คุณสามารถขยายขีดความสามารถของแท็บเล็ตได้ ข้อมูลจะถูกนำไปใช้กับ LineageOS<xliff:g id="name" example="Privacy Policy">%s</xliff:g></string>
+    <string name="services_explanation" product="default">บริการเหล่านี้ช่วยให้คุณสามารถขยายขีดความสามารถของโทรศัพท์ได้ ข้อมูลจะถูกนำไปใช้กับ LineageOS<xliff:g id="name" example="Privacy Policy">%s</xliff:g>.</string>
+    <string name="services_privacy_policy">นโยบายความเป็นส่วนตัว</string>
     <string name="services_help_improve_cm">ช่วยปรับปรุง <xliff:g id="name" example="LineageOS">%s</xliff:g></string>
+    <string name="services_metrics_label"><xliff:g id="name" example="Help improve LineageOS">%1$s</xliff:g> โดยการส่งข้อมูลการวินิจฉัยและการใช้งานไปยัง LineageOS โดยอัตโนมัติ ไม่สามารถใช้ข้อมูลนี้ในการระบุตัวคุณและให้ความช่วยเหลือแก่ทีมที่ทำงานเกี่ยวกับสิ่งต่าง ๆ เช่นอายุการใช้งานแบตเตอรี่ ประสิทธิภาพของแอป และคุณสมบัติ <xliff:g id="name" example="LineageOS">%2$s</xliff:g> ใหม่</string>
     <string name="services_os_nav_keys_label"><b>ใช้แถบนำทาง</b> แทนการใช้ปุ่มบนอุปกรณ์</string>
+    <string name="setup_unlock">ปลดล็อค</string>
+    <string name="setup_device_locked">อุปกรณ์นี้ถูกล็อคโดยผู้ใช้</string>
+    <string name="setup_require_cyanogen_label"><b>ต้องใช้รหัสผ่านบัญชีของคุณ</b> เพื่อใช้งานอุปกรณ์ของคุณแม้หลังจากรีเซ็ตเป็นค่าโรงงาน</string>
+    <string name="setup_device_locked_instructions"><i>เพื่อปิด/เปิดคุณสมบัตินี้ กรุณาไปที่ การตั้งค่า &gt; ความปลอดภัย</i></string>
     <string name="settings_biometric_setup_title">เลือกประเภทการล็อคหน้าจอสำรอง</string>
     <string name="settings_biometric_setup_details">คุณต้องการล็อคหน้าจอด้วยวิธีใด</string>
     <string name="fingerprint_setup_title">การตั้งค่าลายนิ้วมือ</string>
@@ -66,5 +76,4 @@
     <string name="lockscreen_setup_title" product="default">ปกป้องโทรศัพท์ของคุณ</string>
     <string name="lockscreen_setup_summary"><b>ปกป้องอุปกรณ์นี้</b>และกำหนดให้มีการใช้ PIN, รูปแบบ หรือรหัสผ่านเพื่อปลดล็อกหน้าจอ</string>
     <string name="lockscreen_setup_screen_lock_setup">ตั้งค่า</string>
-    <string name="update_recovery_title">อัปเดตรุ่น Lineage Recovery</string>
 </resources>

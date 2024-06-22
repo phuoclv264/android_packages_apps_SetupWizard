@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
- *               2022 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +16,8 @@
 
 package org.lineageos.setupwizard.widget;
 
+import org.lineageos.setupwizard.R;
+
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -27,7 +28,6 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.icu.text.DecimalFormatSymbols;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -57,18 +57,17 @@ import android.widget.LinearLayout;
 import android.widget.Scroller;
 import android.widget.TextView;
 
-import androidx.annotation.IdRes;
-
-import org.lineageos.setupwizard.R;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import libcore.icu.LocaleData;
+
 /**
- * A widget that enables the user to select a number form a predefined range. There are two flavors
- * of this widget and which one is presented to the user depends on the current theme.
+ * A widget that enables the user to select a number form a predefined range.
+ * There are two flavors of this widget and which one is presented to the user
+ * depends on the current theme.
  * <ul>
  * <li>
  * If the current theme is derived from {@link android.R.style#Theme} the widget
@@ -153,9 +152,10 @@ public class LocalePicker extends LinearLayout {
     private static final int SIZE_UNSPECIFIED = -1;
 
     /**
-     * Use a custom NumberPicker formatting callback to use two-digit minutes strings like "01".
-     * Keeping a static formatter etc. is the most efficient way to do this; it avoids creating
-     * temporary objects on every call to format().
+     * Use a custom NumberPicker formatting callback to use two-digit minutes
+     * strings like "01". Keeping a static formatter etc. is the most efficient
+     * way to do this; it avoids creating temporary objects on every call to
+     * format().
      */
     private static class TwoDigitFormatter implements LocalePicker.Formatter {
         final StringBuilder mBuilder = new StringBuilder();
@@ -187,7 +187,7 @@ public class LocalePicker extends LinearLayout {
         }
 
         private static char getZeroDigit(Locale locale) {
-            return DecimalFormatSymbols.getInstance(locale).getZeroDigit();
+            return LocaleData.get(locale).zeroDigit;
         }
 
         private java.util.Formatter createFormatter(Locale locale) {
@@ -315,8 +315,7 @@ public class LocalePicker extends LinearLayout {
     private final Paint mSelectorWheelPaint;
 
     /**
-     * The {@link android.graphics.drawable.Drawable} for pressed virtual (increment/decrement)
-     * buttons.
+     * The {@link android.graphics.drawable.Drawable} for pressed virtual (increment/decrement) buttons.
      */
     private final Drawable mVirtualButtonPressedDrawable;
 
@@ -356,7 +355,8 @@ public class LocalePicker extends LinearLayout {
     private SetSelectionCommand mSetSelectionCommand;
 
     /**
-     * Handle to the reusable command for changing the current value from long press by one.
+     * Handle to the reusable command for changing the current value from long
+     * press by one.
      */
     private ChangeCurrentByOneFromLongPressCommand mChangeCurrentByOneFromLongPressCommand;
 
@@ -388,17 +388,17 @@ public class LocalePicker extends LinearLayout {
     /**
      * @see android.view.ViewConfiguration#getScaledTouchSlop()
      */
-    private final int mTouchSlop;
+    private int mTouchSlop;
 
     /**
      * @see android.view.ViewConfiguration#getScaledMinimumFlingVelocity()
      */
-    private final int mMinimumFlingVelocity;
+    private int mMinimumFlingVelocity;
 
     /**
      * @see android.view.ViewConfiguration#getScaledMaximumFlingVelocity()
      */
-    private final int mMaximumFlingVelocity;
+    private int mMaximumFlingVelocity;
 
     /**
      * Flag whether the selector should wrap around.
@@ -431,8 +431,8 @@ public class LocalePicker extends LinearLayout {
     private int mScrollState = OnScrollListener.SCROLL_STATE_IDLE;
 
     /**
-     * Flag whether to ignore move events - we ignore such when we show in IME to prevent the
-     * content from scrolling.
+     * Flag whether to ignore move events - we ignore such when we show in IME
+     * to prevent the content from scrolling.
      */
     private boolean mIngonreMoveEvents;
 
@@ -504,26 +504,28 @@ public class LocalePicker extends LinearLayout {
         /**
          * The view is not scrolling.
          */
-        int SCROLL_STATE_IDLE = 0;
+        public static int SCROLL_STATE_IDLE = 0;
 
         /**
          * The user is scrolling using touch, and his finger is still on the screen.
          */
-        int SCROLL_STATE_TOUCH_SCROLL = 1;
+        public static int SCROLL_STATE_TOUCH_SCROLL = 1;
 
         /**
          * The user had previously been scrolling using touch and performed a fling.
          */
-        int SCROLL_STATE_FLING = 2;
+        public static int SCROLL_STATE_FLING = 2;
 
         /**
          * Callback invoked while the number picker scroll state has changed.
          *
-         * @param view        The view whose scroll state is being reported.
-         * @param scrollState The current scroll state. One of {@link #SCROLL_STATE_IDLE}, {@link
-         *                    #SCROLL_STATE_TOUCH_SCROLL} or {@link #SCROLL_STATE_IDLE}.
+         * @param view The view whose scroll state is being reported.
+         * @param scrollState The current scroll state. One of
+         *            {@link #SCROLL_STATE_IDLE},
+         *            {@link #SCROLL_STATE_TOUCH_SCROLL} or
+         *            {@link #SCROLL_STATE_IDLE}.
          */
-        void onScrollStateChange(LocalePicker view, int scrollState);
+        public void onScrollStateChange(LocalePicker view, int scrollState);
     }
 
     /**
@@ -537,7 +539,7 @@ public class LocalePicker extends LinearLayout {
          * @param value The currently selected value.
          * @return A formatted string representation.
          */
-        String format(int value);
+        public String format(int value);
     }
 
     /**
@@ -553,7 +555,7 @@ public class LocalePicker extends LinearLayout {
      * Create a new number picker.
      *
      * @param context The application environment.
-     * @param attrs   A collection of attributes.
+     * @param attrs A collection of attributes.
      */
     public LocalePicker(Context context, AttributeSet attrs) {
         this(context, attrs, R.attr.localePickerStyle);
@@ -562,16 +564,15 @@ public class LocalePicker extends LinearLayout {
     /**
      * Create a new number picker
      *
-     * @param context  the application environment.
-     * @param attrs    a collection of attributes.
+     * @param context the application environment.
+     * @param attrs a collection of attributes.
      * @param defStyle The default style to apply to this view.
      */
     public LocalePicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         sSelectorWheelItemCount = context.getResources().getInteger(R.integer.local_picker_items);
-        sSelectorMiddleItemIndex = context.getResources().getInteger(R.integer.local_picker_items)
-                / 2;
-        mSelectorIndices = new int[sSelectorWheelItemCount];
+        sSelectorMiddleItemIndex = context.getResources().getInteger(R.integer.local_picker_items)/2;
+        mSelectorIndices= new int[sSelectorWheelItemCount];
         // process style attributes
         TypedArray attributesArray = context.obtainStyledAttributes(
                 attrs, R.styleable.LocalePicker, defStyle, 0);
@@ -640,7 +641,11 @@ public class LocalePicker extends LinearLayout {
             public void onClick(View v) {
                 hideSoftInput();
                 mInputText.clearFocus();
-                changeValueByOne(v.getId() == R.id.lp__increment);
+                if (v.getId() == R.id.lp__increment) {
+                    changeValueByOne(true);
+                } else {
+                    changeValueByOne(false);
+                }
             }
         };
 
@@ -648,7 +653,11 @@ public class LocalePicker extends LinearLayout {
             public boolean onLongClick(View v) {
                 hideSoftInput();
                 mInputText.clearFocus();
-                postChangeCurrentByOneFromLongPress(v.getId() == R.id.lp__increment, 0);
+                if (v.getId() == R.id.lp__increment) {
+                    postChangeCurrentByOneFromLongPress(true, 0);
+                } else {
+                    postChangeCurrentByOneFromLongPress(false, 0);
+                }
                 return true;
             }
         };
@@ -683,8 +692,8 @@ public class LocalePicker extends LinearLayout {
                 }
             }
         });
-        mInputText.setFilters(new InputFilter[]{
-                new InputTextFilter()
+        mInputText.setFilters(new InputFilter[] {
+            new InputTextFilter()
         });
 
         mInputText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
@@ -769,9 +778,9 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Move to the final position of a scroller. Ensures to force finish the scroller and if it is
-     * not at its final position a scroll of the selector wheel is performed to fast forward to the
-     * final position.
+     * Move to the final position of a scroller. Ensures to force finish the scroller
+     * and if it is not at its final position a scroll of the selector wheel is
+     * performed to fast forward to the final position.
      *
      * @param scroller The scroller to whose final position to get.
      * @return True of the a move was performed, i.e. the scroller was not in final position.
@@ -877,8 +886,7 @@ public class LocalePicker extends LinearLayout {
                     invalidate();
                 }
                 mLastDownOrMoveEventY = currentMoveY;
-            }
-            break;
+            } break;
             case MotionEvent.ACTION_UP: {
                 removeBeginSoftInputCommand();
                 removeChangeCurrentByOneFromLongPress();
@@ -917,8 +925,7 @@ public class LocalePicker extends LinearLayout {
                 }
                 mVelocityTracker.recycle();
                 mVelocityTracker = null;
-            }
-            break;
+            } break;
         }
         return true;
     }
@@ -1001,7 +1008,7 @@ public class LocalePicker extends LinearLayout {
             }
             final int action = event.getActionMasked();
             AccessibilityNodeProviderImpl provider =
-                    (AccessibilityNodeProviderImpl) getAccessibilityNodeProvider();
+                (AccessibilityNodeProviderImpl) getAccessibilityNodeProvider();
             switch (action) {
                 case MotionEvent.ACTION_HOVER_ENTER: {
                     provider.sendAccessibilityEventForVirtualView(hoveredVirtualViewId,
@@ -1009,8 +1016,7 @@ public class LocalePicker extends LinearLayout {
                     mLastHoveredChildVirtualViewId = hoveredVirtualViewId;
                     provider.performAction(hoveredVirtualViewId,
                             AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
-                }
-                break;
+                } break;
                 case MotionEvent.ACTION_HOVER_MOVE: {
                     if (mLastHoveredChildVirtualViewId != hoveredVirtualViewId
                             && mLastHoveredChildVirtualViewId != View.NO_ID) {
@@ -1023,14 +1029,12 @@ public class LocalePicker extends LinearLayout {
                         provider.performAction(hoveredVirtualViewId,
                                 AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
                     }
-                }
-                break;
+                } break;
                 case MotionEvent.ACTION_HOVER_EXIT: {
                     provider.sendAccessibilityEventForVirtualView(hoveredVirtualViewId,
                             AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
                     mLastHoveredChildVirtualViewId = View.NO_ID;
-                }
-                break;
+                } break;
             }
         }
         return false;
@@ -1129,13 +1133,13 @@ public class LocalePicker extends LinearLayout {
     /**
      * Set the formatter to be used for formatting the current value.
      * <p>
-     * Note: If you have provided alternative values for the values this formatter is never
-     * invoked.
+     * Note: If you have provided alternative values for the values this
+     * formatter is never invoked.
      * </p>
      *
-     * @param formatter The formatter object. If formatter is <code>null</code>, {@link
-     *                  String#valueOf(int)} will be used.
-     * @see #setDisplayedValues(String[])
+     * @param formatter The formatter object. If formatter is <code>null</code>,
+     *            {@link String#valueOf(int)} will be used.
+     *@see #setDisplayedValues(String[])
      */
     public void setFormatter(Formatter formatter) {
         if (formatter == mFormatter) {
@@ -1149,24 +1153,24 @@ public class LocalePicker extends LinearLayout {
     /**
      * Set the current value for the number picker.
      * <p>
-     * If the argument is less than the {@link LocalePicker#getMinValue()} and {@link
-     * LocalePicker#getWrapSelectorWheel()} is <code>false</code> the current value is set to the
-     * {@link LocalePicker#getMinValue()} value.
+     * If the argument is less than the {@link LocalePicker#getMinValue()} and
+     * {@link LocalePicker#getWrapSelectorWheel()} is <code>false</code> the
+     * current value is set to the {@link LocalePicker#getMinValue()} value.
      * </p>
      * <p>
-     * If the argument is less than the {@link LocalePicker#getMinValue()} and {@link
-     * LocalePicker#getWrapSelectorWheel()} is <code>true</code> the current value is set to the
-     * {@link LocalePicker#getMaxValue()} value.
+     * If the argument is less than the {@link LocalePicker#getMinValue()} and
+     * {@link LocalePicker#getWrapSelectorWheel()} is <code>true</code> the
+     * current value is set to the {@link LocalePicker#getMaxValue()} value.
      * </p>
      * <p>
-     * If the argument is less than the {@link LocalePicker#getMaxValue()} and {@link
-     * LocalePicker#getWrapSelectorWheel()} is <code>false</code> the current value is set to the
-     * {@link LocalePicker#getMaxValue()} value.
+     * If the argument is less than the {@link LocalePicker#getMaxValue()} and
+     * {@link LocalePicker#getWrapSelectorWheel()} is <code>false</code> the
+     * current value is set to the {@link LocalePicker#getMaxValue()} value.
      * </p>
      * <p>
-     * If the argument is less than the {@link LocalePicker#getMaxValue()} and {@link
-     * LocalePicker#getWrapSelectorWheel()} is <code>true</code> the current value is set to the
-     * {@link LocalePicker#getMinValue()} value.
+     * If the argument is less than the {@link LocalePicker#getMaxValue()} and
+     * {@link LocalePicker#getWrapSelectorWheel()} is <code>true</code> the
+     * current value is set to the {@link LocalePicker#getMinValue()} value.
      * </p>
      *
      * @param value The current value.
@@ -1176,14 +1180,6 @@ public class LocalePicker extends LinearLayout {
      */
     public void setValue(int value) {
         setValueInternal(value, false);
-    }
-
-    /**
-     * Sets the next focused item for a remote D-pad key right.
-     * @param id The ID of the next view.
-     */
-    public void setNextRight(@IdRes int id) {
-        setNextFocusRightId(id);
     }
 
     /**
@@ -1260,6 +1256,7 @@ public class LocalePicker extends LinearLayout {
      * Gets whether the selector wheel wraps when reaching the min/max value.
      *
      * @return True if the selector wheel wraps.
+     *
      * @see #getMinValue()
      * @see #getMaxValue()
      */
@@ -1268,17 +1265,18 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Sets whether the selector wheel shown during flinging/scrolling should wrap around the {@link
-     * LocalePicker#getMinValue()} and {@link LocalePicker#getMaxValue()} values.
+     * Sets whether the selector wheel shown during flinging/scrolling should
+     * wrap around the {@link LocalePicker#getMinValue()} and
+     * {@link LocalePicker#getMaxValue()} values.
      * <p>
-     * By default if the range (max - min) is more than the number of items shown on the selector
-     * wheel the selector wheel wrapping is enabled.
+     * By default if the range (max - min) is more than the number of items shown
+     * on the selector wheel the selector wheel wrapping is enabled.
      * </p>
      * <p>
      * <strong>Note:</strong> If the number of items, i.e. the range (
-     * {@link #getMaxValue()} - {@link #getMinValue()}) is less than the number of items shown on
-     * the selector wheel, the selector wheel will not wrap. Hence, in such a case calling this
-     * method is a NOP.
+     * {@link #getMaxValue()} - {@link #getMinValue()}) is less than
+     * the number of items shown on the selector wheel, the selector wheel will
+     * not wrap. Hence, in such a case calling this method is a NOP.
      * </p>
      *
      * @param wrapSelectorWheel Whether to wrap.
@@ -1291,14 +1289,14 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Sets the speed at which the numbers be incremented and decremented when the up and down
-     * buttons are long pressed respectively.
+     * Sets the speed at which the numbers be incremented and decremented when
+     * the up and down buttons are long pressed respectively.
      * <p>
      * The default value is 300 ms.
      * </p>
      *
-     * @param intervalMillis The speed (in milliseconds) at which the numbers will be incremented
-     *                       and decremented.
+     * @param intervalMillis The speed (in milliseconds) at which the numbers
+     *            will be incremented and decremented.
      */
     public void setOnLongPressUpdateInterval(long intervalMillis) {
         mLongPressUpdateInterval = intervalMillis;
@@ -1327,10 +1325,10 @@ public class LocalePicker extends LinearLayout {
      *
      * @param minValue The min value inclusive.
      *
-     *                 <strong>Note:</strong> The length of the displayed values array
-     *                 set via {@link #setDisplayedValues(String[])} must be equal to the range of
-     *                 selectable numbers which is equal to {@link #getMaxValue()} - {@link
-     *                 #getMinValue()} + 1.
+     * <strong>Note:</strong> The length of the displayed values array
+     * set via {@link #setDisplayedValues(String[])} must be equal to the
+     * range of selectable numbers which is equal to
+     * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
      */
     public void setMinValue(int minValue) {
         if (mMinValue == minValue) {
@@ -1365,10 +1363,10 @@ public class LocalePicker extends LinearLayout {
      *
      * @param maxValue The max value inclusive.
      *
-     *                 <strong>Note:</strong> The length of the displayed values array
-     *                 set via {@link #setDisplayedValues(String[])} must be equal to the range of
-     *                 selectable numbers which is equal to {@link #getMaxValue()} - {@link
-     *                 #getMinValue()} + 1.
+     * <strong>Note:</strong> The length of the displayed values array
+     * set via {@link #setDisplayedValues(String[])} must be equal to the
+     * range of selectable numbers which is equal to
+     * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
      */
     public void setMaxValue(int maxValue) {
         if (mMaxValue == maxValue) {
@@ -1403,9 +1401,9 @@ public class LocalePicker extends LinearLayout {
      *
      * @param displayedValues The displayed values.
      *
-     *                        <strong>Note:</strong> The length of the displayed values array
-     *                        must be equal to the range of selectable numbers which is equal to
-     *                        {@link #getMaxValue()} - {@link #getMinValue()} + 1.
+     * <strong>Note:</strong> The length of the displayed values array
+     * must be equal to the range of selectable numbers which is equal to
+     * {@link #getMaxValue()} - {@link #getMinValue()} + 1.
      */
     public void setDisplayedValues(String[] displayedValues) {
         if (mDisplayedValues == displayedValues) {
@@ -1520,7 +1518,7 @@ public class LocalePicker extends LinearLayout {
      * Makes a measure spec that tries greedily to use the max value.
      *
      * @param measureSpec The measure spec.
-     * @param maxSize     The max value for the size.
+     * @param maxSize The max value for the size.
      * @return A measure spec greedily imposing the max size.
      */
     private int makeMeasureSpec(int measureSpec, int maxSize) {
@@ -1542,12 +1540,13 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Utility to reconcile a desired size and state, with constraints imposed by a MeasureSpec.
-     * Tries to respect the min size, unless a different size is imposed by the constraints.
+     * Utility to reconcile a desired size and state, with constraints imposed
+     * by a MeasureSpec. Tries to respect the min size, unless a different size
+     * is imposed by the constraints.
      *
-     * @param minSize      The minimal desired size.
+     * @param minSize The minimal desired size.
      * @param measuredSize The currently measured size.
-     * @param measureSpec  The current measure spec.
+     * @param measureSpec The current measure spec.
      * @return The resolved size and state.
      */
     private int resolveSizeAndStateRespectingMinSize(
@@ -1561,7 +1560,8 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Resets the selector indices and clear the cached string representation of these indices.
+     * Resets the selector indices and clear the cached string representation of
+     * these indices.
      */
     private void initializeSelectorWheelIndices() {
         mSelectorIndexToStringCache.clear();
@@ -1580,7 +1580,7 @@ public class LocalePicker extends LinearLayout {
     /**
      * Sets the current value of this NumberPicker.
      *
-     * @param current      The new value of the NumberPicker.
+     * @param current The new value of the NumberPicker.
      * @param notifyChange Whether to notify if the current value changed.
      */
     private void setValueInternal(int current, boolean notifyChange) {
@@ -1605,12 +1605,13 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Changes the current value by one which is increment or decrement based on the passes
-     * argument. decrement the current value.
+     * Changes the current value by one which is increment or
+     * decrement based on the passes argument.
+     * decrement the current value.
      *
      * @param increment True to increment, false to decrement.
      */
-    private void changeValueByOne(boolean increment) {
+     private void changeValueByOne(boolean increment) {
         if (mHasSelectorWheel) {
             mInputText.setVisibility(View.INVISIBLE);
             if (!moveToFinalScrollerPosition(mFlingScroller)) {
@@ -1711,8 +1712,8 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Increments the <code>selectorIndices</code> whose string representations will be displayed in
-     * the selector.
+     * Increments the <code>selectorIndices</code> whose string representations
+     * will be displayed in the selector.
      */
     private void incrementSelectorIndices(int[] selectorIndices) {
         for (int i = 0; i < selectorIndices.length - 1; i++) {
@@ -1727,8 +1728,8 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Decrements the <code>selectorIndices</code> whose string representations will be displayed in
-     * the selector.
+     * Decrements the <code>selectorIndices</code> whose string representations
+     * will be displayed in the selector.
      */
     private void decrementSelectorIndices(int[] selectorIndices) {
         for (int i = selectorIndices.length - 1; i > 0; i--) {
@@ -1743,8 +1744,8 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Ensures we have a cached string representation of the given <code> selectorIndex</code> to
-     * avoid multiple instantiations of the same string.
+     * Ensures we have a cached string representation of the given <code>
+     * selectorIndex</code> to avoid multiple instantiations of the same string.
      */
     private void ensureCachedScrollSelectorValue(int selectorIndex) {
         SparseArray<String> cache = mSelectorIndexToStringCache;
@@ -1776,15 +1777,16 @@ public class LocalePicker extends LinearLayout {
             updateInputTextView();
         } else {
             // Check the new value and ensure it's in range
-            int current = getSelectedPos(str);
+            int current = getSelectedPos(str.toString());
             setValueInternal(current, true);
         }
     }
 
     /**
-     * Updates the view of this NumberPicker. If displayValues were specified in the string
-     * corresponding to the index specified by the current value will be returned. Otherwise, the
-     * formatter specified in {@link #setFormatter} will be used to format the number.
+     * Updates the view of this NumberPicker. If displayValues were specified in
+     * the string corresponding to the index specified by the current value will
+     * be returned. Otherwise, the formatter specified in {@link #setFormatter}
+     * will be used to format the number.
      *
      * @return Whether the text was updated.
      */
@@ -1805,7 +1807,8 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Notifies the listener, if registered, of a change of the value of this NumberPicker.
+     * Notifies the listener, if registered, of a change of the value of this
+     * NumberPicker.
      */
     private void notifyChange(int previous, int current) {
         if (mOnValueChangeListener != null) {
@@ -1838,7 +1841,8 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Posts a command for beginning an edit of the current value via IME on long press.
+     * Posts a command for beginning an edit of the current value via IME on
+     * long press.
      */
     private void postBeginSoftInputOnLongPressCommand() {
         if (mBeginSoftInputOnLongPressCommand == null) {
@@ -1925,7 +1929,7 @@ public class LocalePicker extends LinearLayout {
     /**
      * The numbers accepted by the input text's {@link android.view.LayoutInflater.Filter}
      */
-    private static final char[] DIGIT_CHARACTERS = new char[]{
+    private static final char[] DIGIT_CHARACTERS = new char[] {
             // Latin digits are the common case
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
             // Arabic-Indic
@@ -1937,8 +1941,8 @@ public class LocalePicker extends LinearLayout {
     };
 
     /**
-     * Filter for accepting only valid indices or prefixes of the string representation of valid
-     * indices.
+     * Filter for accepting only valid indices or prefixes of the string
+     * representation of valid indices.
      */
     class InputTextFilter extends NumberKeyListener {
 
@@ -1989,7 +1993,7 @@ public class LocalePicker extends LinearLayout {
                 }
                 String result = String.valueOf(dest.subSequence(0, dstart)) + filtered
                         + dest.subSequence(dend, dest.length());
-                String str = result.toLowerCase();
+                String str = String.valueOf(result).toLowerCase();
                 for (String val : mDisplayedValues) {
                     String valLowerCase = val.toLowerCase();
                     if (valLowerCase.startsWith(str)) {
@@ -2003,8 +2007,8 @@ public class LocalePicker extends LinearLayout {
     }
 
     /**
-     * Ensures that the scroll wheel is adjusted i.e. there is no offset and the middle element is
-     * in the middle of the widget.
+     * Ensures that the scroll wheel is adjusted i.e. there is no offset and the
+     * middle element is in the middle of the widget.
      *
      * @return Whether an adjustment has been made.
      */
@@ -2069,15 +2073,13 @@ public class LocalePicker extends LinearLayout {
                         case BUTTON_INCREMENT: {
                             mIncrementVirtualButtonPressed = true;
                             invalidate(0, mBottomSelectionDividerBottom, mRight, mBottom);
-                        }
-                        break;
+                        } break;
                         case BUTTON_DECREMENT: {
                             mDecrementVirtualButtonPressed = true;
                             invalidate(0, 0, mRight, mTopSelectionDividerTop);
                         }
                     }
-                }
-                break;
+                } break;
                 case MODE_TAPPED: {
                     switch (mManagedButton) {
                         case BUTTON_INCREMENT: {
@@ -2087,8 +2089,7 @@ public class LocalePicker extends LinearLayout {
                             }
                             mIncrementVirtualButtonPressed ^= true;
                             invalidate(0, mBottomSelectionDividerBottom, mRight, mBottom);
-                        }
-                        break;
+                        } break;
                         case BUTTON_DECREMENT: {
                             if (!mDecrementVirtualButtonPressed) {
                                 LocalePicker.this.postDelayed(this,
@@ -2098,8 +2099,7 @@ public class LocalePicker extends LinearLayout {
                             invalidate(0, 0, mRight, mTopSelectionDividerTop);
                         }
                     }
-                }
-                break;
+                } break;
             }
         }
     }
@@ -2186,7 +2186,7 @@ public class LocalePicker extends LinearLayout {
         public AccessibilityNodeInfo createAccessibilityNodeInfo(int virtualViewId) {
             switch (virtualViewId) {
                 case View.NO_ID:
-                    return createAccessibilityNodeInfoForNumberPicker(mScrollX, mScrollY,
+                    return createAccessibilityNodeInfoForNumberPicker( mScrollX, mScrollY,
                             mScrollX + (mRight - mLeft), mScrollY + (mBottom - mTop));
                 case VIRTUAL_VIEW_ID_DECREMENT:
                     return createAccessibilityNodeInfoForVirtualButton(VIRTUAL_VIEW_ID_DECREMENT,
@@ -2247,8 +2247,7 @@ public class LocalePicker extends LinearLayout {
                                 requestAccessibilityFocus();
                                 return true;
                             }
-                        }
-                        return false;
+                        } return false;
                         case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
                             if (mAccessibilityFocusedView == virtualViewId) {
                                 mAccessibilityFocusedView = UNDEFINED;
@@ -2263,27 +2262,23 @@ public class LocalePicker extends LinearLayout {
                                 changeValueByOne(true);
                                 return true;
                             }
-                        }
-                        return false;
+                        } return false;
                         case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
                             if (LocalePicker.this.isEnabled()
                                     && (getWrapSelectorWheel() || getValue() > getMinValue())) {
                                 changeValueByOne(false);
                                 return true;
                             }
-                        }
-                        return false;
+                        } return false;
                     }
-                }
-                break;
+                } break;
                 case VIRTUAL_VIEW_ID_INPUT: {
                     switch (action) {
                         case AccessibilityNodeInfo.ACTION_FOCUS: {
                             if (LocalePicker.this.isEnabled() && !mInputText.isFocused()) {
                                 return mInputText.requestFocus();
                             }
-                        }
-                        break;
+                        } break;
                         case AccessibilityNodeInfo.ACTION_CLEAR_FOCUS: {
                             if (LocalePicker.this.isEnabled() && mInputText.isFocused()) {
                                 mInputText.clearFocus();
@@ -2306,9 +2301,8 @@ public class LocalePicker extends LinearLayout {
                                 mInputText.invalidate();
                                 return true;
                             }
-                        }
-                        return false;
-                        case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
+                        } return false;
+                        case  AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
                             if (mAccessibilityFocusedView == virtualViewId) {
                                 mAccessibilityFocusedView = UNDEFINED;
                                 sendAccessibilityEventForVirtualView(virtualViewId,
@@ -2316,14 +2310,12 @@ public class LocalePicker extends LinearLayout {
                                 mInputText.invalidate();
                                 return true;
                             }
-                        }
-                        return false;
+                        } return false;
                         default: {
                             return mInputText.performAccessibilityAction(action, arguments);
                         }
                     }
-                }
-                return false;
+                } return false;
                 case VIRTUAL_VIEW_ID_INCREMENT: {
                     switch (action) {
                         case AccessibilityNodeInfo.ACTION_CLICK: {
@@ -2333,8 +2325,7 @@ public class LocalePicker extends LinearLayout {
                                         AccessibilityEvent.TYPE_VIEW_CLICKED);
                                 return true;
                             }
-                        }
-                        return false;
+                        } return false;
                         case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS: {
                             if (mAccessibilityFocusedView != virtualViewId) {
                                 mAccessibilityFocusedView = virtualViewId;
@@ -2343,9 +2334,8 @@ public class LocalePicker extends LinearLayout {
                                 invalidate(0, mBottomSelectionDividerBottom, mRight, mBottom);
                                 return true;
                             }
-                        }
-                        return false;
-                        case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
+                        } return false;
+                        case  AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
                             if (mAccessibilityFocusedView == virtualViewId) {
                                 mAccessibilityFocusedView = UNDEFINED;
                                 sendAccessibilityEventForVirtualView(virtualViewId,
@@ -2353,24 +2343,20 @@ public class LocalePicker extends LinearLayout {
                                 invalidate(0, mBottomSelectionDividerBottom, mRight, mBottom);
                                 return true;
                             }
-                        }
-                        return false;
+                        } return false;
                     }
-                }
-                return false;
+                } return false;
                 case VIRTUAL_VIEW_ID_DECREMENT: {
                     switch (action) {
                         case AccessibilityNodeInfo.ACTION_CLICK: {
                             if (LocalePicker.this.isEnabled()) {
-                                final boolean increment =
-                                        (virtualViewId == VIRTUAL_VIEW_ID_INCREMENT);
+                                final boolean increment = (virtualViewId == VIRTUAL_VIEW_ID_INCREMENT);
                                 LocalePicker.this.changeValueByOne(increment);
                                 sendAccessibilityEventForVirtualView(virtualViewId,
                                         AccessibilityEvent.TYPE_VIEW_CLICKED);
                                 return true;
                             }
-                        }
-                        return false;
+                        } return false;
                         case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS: {
                             if (mAccessibilityFocusedView != virtualViewId) {
                                 mAccessibilityFocusedView = virtualViewId;
@@ -2379,9 +2365,8 @@ public class LocalePicker extends LinearLayout {
                                 invalidate(0, 0, mRight, mTopSelectionDividerTop);
                                 return true;
                             }
-                        }
-                        return false;
-                        case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
+                        } return false;
+                        case  AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: {
                             if (mAccessibilityFocusedView == virtualViewId) {
                                 mAccessibilityFocusedView = UNDEFINED;
                                 sendAccessibilityEventForVirtualView(virtualViewId,
@@ -2389,11 +2374,9 @@ public class LocalePicker extends LinearLayout {
                                 invalidate(0, 0, mRight, mTopSelectionDividerTop);
                                 return true;
                             }
-                        }
-                        return false;
+                        } return false;
                     }
-                }
-                return false;
+                } return false;
             }
             return super.performAction(virtualViewId, action, arguments);
         }
@@ -2405,19 +2388,16 @@ public class LocalePicker extends LinearLayout {
                         sendAccessibilityEventForVirtualButton(virtualViewId, eventType,
                                 getVirtualDecrementButtonText());
                     }
-                }
-                break;
+                } break;
                 case VIRTUAL_VIEW_ID_INPUT: {
                     sendAccessibilityEventForVirtualText(eventType);
-                }
-                break;
+                } break;
                 case VIRTUAL_VIEW_ID_INCREMENT: {
                     if (hasVirtualIncrementButton()) {
                         sendAccessibilityEventForVirtualButton(virtualViewId, eventType,
                                 getVirtualIncrementButtonText());
                     }
-                }
-                break;
+                } break;
             }
         }
 
@@ -2450,11 +2430,10 @@ public class LocalePicker extends LinearLayout {
                 case VIRTUAL_VIEW_ID_DECREMENT: {
                     String text = getVirtualDecrementButtonText();
                     if (!TextUtils.isEmpty(text)
-                            && text.toLowerCase().contains(searchedLowerCase)) {
+                            && text.toString().toLowerCase().contains(searchedLowerCase)) {
                         outResult.add(createAccessibilityNodeInfo(VIRTUAL_VIEW_ID_DECREMENT));
                     }
-                }
-                return;
+                } return;
                 case VIRTUAL_VIEW_ID_INPUT: {
                     CharSequence text = mInputText.getText();
                     if (!TextUtils.isEmpty(text) &&
@@ -2468,16 +2447,14 @@ public class LocalePicker extends LinearLayout {
                         outResult.add(createAccessibilityNodeInfo(VIRTUAL_VIEW_ID_INPUT));
                         return;
                     }
-                }
-                break;
+                } break;
                 case VIRTUAL_VIEW_ID_INCREMENT: {
                     String text = getVirtualIncrementButtonText();
                     if (!TextUtils.isEmpty(text)
-                            && text.toLowerCase().contains(searchedLowerCase)) {
+                            && text.toString().toLowerCase().contains(searchedLowerCase)) {
                         outResult.add(createAccessibilityNodeInfo(VIRTUAL_VIEW_ID_INCREMENT));
                     }
-                }
-                return;
+                } return;
             }
         }
 
@@ -2557,7 +2534,7 @@ public class LocalePicker extends LinearLayout {
             info.setScrollable(true);
 
             final float applicationScale =
-                    getContext().getResources().getCompatibilityInfo().applicationScale;
+                getContext().getResources().getCompatibilityInfo().applicationScale;
 
             Rect boundsInParent = mTempRect;
             boundsInParent.set(left, top, right, bottom);

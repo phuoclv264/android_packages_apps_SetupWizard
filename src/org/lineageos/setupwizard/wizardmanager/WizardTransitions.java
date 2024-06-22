@@ -24,6 +24,8 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.util.SparseArray;
 
+import org.lineageos.setupwizard.SetupWizardApp;
+
 public class WizardTransitions extends SparseArray<String> implements Parcelable {
 
     private static final String TAG = "WizardTransitions";
@@ -45,8 +47,7 @@ public class WizardTransitions extends SparseArray<String> implements Parcelable
         }
     };
 
-    public WizardTransitions() {
-    }
+    public WizardTransitions() {}
 
     public void setDefaultAction(String action) {
         mDefaultAction = action;
@@ -76,13 +77,12 @@ public class WizardTransitions extends SparseArray<String> implements Parcelable
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WizardTransitions that = (WizardTransitions) o;
-        return mDefaultAction != null ? mDefaultAction.equals(that.mDefaultAction)
-                : that.mDefaultAction == null;
+        return mDefaultAction != null ? mDefaultAction.equals(that.mDefaultAction) : that.mDefaultAction == null;
 
     }
 
     public int hashCode() {
-        return super.hashCode() + mDefaultAction.hashCode();
+        return  super.hashCode() + mDefaultAction.hashCode();
     }
 
     @Override
@@ -104,5 +104,6 @@ public class WizardTransitions extends SparseArray<String> implements Parcelable
     protected WizardTransitions(Parcel in) {
         mDefaultAction = in.readString();
     }
+
 
 }

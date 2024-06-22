@@ -53,7 +53,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
-import android.sysprop.TelephonyProperties;
+import android.os.SystemProperties;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -77,15 +77,15 @@ public class PhoneMonitor {
     public static final String TAG = PhoneMonitor.class.getSimpleName();
 
     private static PhoneMonitor sInstance;
-    private final Context mContext;
-    private final TelephonyManager mTelephony;
+    private Context mContext;
+    private TelephonyManager mTelephony;
     private SubscriptionManager mSubscriptionManager;
-    private final ArrayList<SubscriptionStateListener> mListeners = new ArrayList<>();
-    private final SparseArray<SubscriptionStateTracker> mTrackers = new SparseArray<>();
+    private ArrayList<SubscriptionStateListener> mListeners = new ArrayList<>();
+    private SparseArray<SubscriptionStateTracker> mTrackers = new SparseArray<>();
 
     private int mChangingToDataSubId = -1;
 
-    private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
@@ -134,14 +134,14 @@ public class PhoneMonitor {
 
     private final OnSubscriptionsChangedListener mOnSubscriptionsChangedListener =
             new OnSubscriptionsChangedListener() {
-                public void onSubscriptionsChanged() {
-                    if (LOGV) {
-                        Log.d(TAG, "Subscriptions changed");
-                    }
-                    super.onSubscriptionsChanged();
-                    updatePhoneStateTrackers();
-                }
-            };
+        public void onSubscriptionsChanged() {
+            if (LOGV) {
+                Log.d(TAG, "Subscriptions changed");
+            }
+            super.onSubscriptionsChanged();
+            updatePhoneStateTrackers();
+        }
+    };
 
     public static void initInstance(Context context) {
         if (sInstance == null) {
@@ -289,10 +289,6 @@ public class PhoneMonitor {
         return true;
     }
 
-    public boolean singleSimInserted() {
-        return mSubscriptionManager.getActiveSubscriptionInfoCount() == 1;
-    }
-
     // We only care that each slot has a sim
     public boolean allSimsInserted() {
         int simSlotCount = mTelephony.getSimCount();
@@ -305,10 +301,6 @@ public class PhoneMonitor {
         return simSlotCount == mSubscriptionManager.getActiveSubscriptionInfoCount();
     }
 
-    public boolean isMultiSimDevice() {
-        return mTelephony.isMultiSimEnabled();
-    }
-
     public boolean isGSM(int subId) {
         return mTelephony.createForSubscriptionId(subId).getCurrentPhoneType() == PHONE_TYPE_GSM;
     }
@@ -318,11 +310,11 @@ public class PhoneMonitor {
     }
 
     public int getLteOnCdmaMode(int subId) {
-        if (mTelephony == null || mTelephony.createForSubscriptionId(subId).getLteOnCdmaMode(subId)
-                == LTE_ON_CDMA_UNKNOWN) {
-            return TelephonyProperties.lte_on_cdma_device().orElse(LTE_ON_CDMA_UNKNOWN);
+        if (mTelephony == null || mTelephony.createForSubscriptionId(subId).getLteOnCdmaMode()
+                    == LTE_ON_CDMA_UNKNOWN) {
+            return SystemProperties.getInt("telephony.lteOnCdmaDevice", LTE_ON_CDMA_UNKNOWN);
         }
-        return mTelephony.createForSubscriptionId(subId).getLteOnCdmaMode(subId);
+        return mTelephony.createForSubscriptionId(subId).getLteOnCdmaMode();
     }
 
     private void logPhoneState(String prefix) {
@@ -489,15 +481,10 @@ public class PhoneMonitor {
 
     public interface SubscriptionStateListener {
         void onServiceStateChanged(int subId, ServiceState serviceState);
-
         void onDataConnectionStateChanged(int subId, int state, int networkType);
-
         void onDefaultDataSubscriptionChanged(int subId);
-
         void onDefaultDataSubscriptionChangeRequested(int currentSubId, int newSubId);
-
         void onSignalStrengthsChanged(int subId, SignalStrength signalStrength);
-
         void onSimStateChanged(int subId, int simState);
     }
 

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2016 The CyanogenMod Project
- * Copyright (C) 2017-2020, 2022 The LineageOS Project
- *
+ * Copyright (C) 2017-2020 The LineageOS Project
+ * Copyright (C) 2018-2019 e.foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,19 +17,11 @@
 
 package org.lineageos.setupwizard;
 
-import static android.os.Binder.getCallingUserHandle;
-import static android.os.UserHandle.USER_CURRENT;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
-
-import static org.lineageos.setupwizard.Manifest.permission.FINISH_SETUP;
 import static org.lineageos.setupwizard.SetupWizardApp.ACTION_SETUP_COMPLETE;
 import static org.lineageos.setupwizard.SetupWizardApp.DISABLE_NAV_KEYS;
-import static org.lineageos.setupwizard.SetupWizardApp.ENABLE_RECOVERY_UPDATE;
+import static org.lineageos.setupwizard.SetupWizardApp.KEY_BUTTON_BACKLIGHT;
 import static org.lineageos.setupwizard.SetupWizardApp.KEY_SEND_METRICS;
 import static org.lineageos.setupwizard.SetupWizardApp.LOGV;
-import static org.lineageos.setupwizard.SetupWizardApp.NAVIGATION_OPTION_KEY;
-import static org.lineageos.setupwizard.SetupWizardApp.UPDATE_RECOVERY_PROP;
 
 import android.animation.Animator;
 import android.app.Activity;
@@ -37,26 +29,25 @@ import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.om.IOverlayManager;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.widget.ImageView;
 
-import com.google.android.setupcompat.util.SystemBarHelper;
 import com.google.android.setupcompat.util.WizardManagerHelper;
 
-import org.lineageos.setupwizard.util.SetupWizardUtils;
+import org.lineageos.setupwizard.util.EnableAccessibilityController;
 
 import lineageos.providers.LineageSettings;
+
+import static android.os.Binder.getCallingUserHandle;
+import static org.lineageos.setupwizard.Manifest.permission.FINISH_SETUP;
 
 public class FinishActivity extends BaseSetupWizardActivity {
 
@@ -64,11 +55,21 @@ public class FinishActivity extends BaseSetupWizardActivity {
 
     private ImageView mReveal;
 
+    private EnableAccessibilityController mEnableAccessibilityController;
+
     private SetupWizardApp mSetupWizardApp;
 
     private final Handler mHandler = new Handler();
 
     private volatile boolean mIsFinishing = false;
+
+
+    // Component name of default weather provider.
+    private static final String OWM =
+            "org.lineageos.openweathermapprovider/org.lineageos.openweathermapprovider"
+                    + ".OpenWeatherMapProviderService";
+
+    private static final int THEME = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +79,8 @@ public class FinishActivity extends BaseSetupWizardActivity {
         }
         mSetupWizardApp = (SetupWizardApp) getApplication();
         mReveal = (ImageView) findViewById(R.id.reveal);
+        mEnableAccessibilityController =
+                EnableAccessibilityController.getInstance(getApplicationContext());
         setNextText(R.string.start);
     }
 
@@ -103,7 +106,18 @@ public class FinishActivity extends BaseSetupWizardActivity {
     private void finishSetup() {
         if (!mIsFinishing) {
             mIsFinishing = true;
-            setupRevealImage();
+            //setupRevealImage();// /e/ remove
+            // eelo 20180527 - fp - end animation cannot be displayed smoothly on some devices (like zerofltexx)
+            // Thus byass animation process.
+            // eelo add
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    completeSetup();
+                }
+            });
+            // /e/
+
         }
     }
 
@@ -113,7 +127,8 @@ public class FinishActivity extends BaseSetupWizardActivity {
         sendBroadcastAsUser(i, getCallingUserHandle(), FINISH_SETUP);
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
-        SystemBarHelper.hideSystemBars(getWindow());
+        hideBackButton();
+        hideNextButton();
         finishSetup();
     }
 
@@ -164,40 +179,44 @@ public class FinishActivity extends BaseSetupWizardActivity {
             }
 
             @Override
-            public void onAnimationCancel(Animator animation) {
-            }
+            public void onAnimationCancel(Animator animation) {}
 
             @Override
-            public void onAnimationRepeat(Animator animation) {
-            }
+            public void onAnimationRepeat(Animator animation) {}
         });
         anim.start();
     }
 
     private void completeSetup() {
+        if (mEnableAccessibilityController != null) {
+            mEnableAccessibilityController.onDestroy();
+        }
+        setupWeatherProvider();
+        setupTheme();
         handleEnableMetrics(mSetupWizardApp);
         handleNavKeys(mSetupWizardApp);
-        handleRecoveryUpdate(mSetupWizardApp);
-        handleNavigationOption(mSetupWizardApp);
         final WallpaperManager wallpaperManager =
                 WallpaperManager.getInstance(mSetupWizardApp);
         wallpaperManager.forgetLoadedWallpaper();
         finishAllAppTasks();
-        SetupWizardUtils.enableStatusBar(this);
         Intent intent = WizardManagerHelper.getNextIntent(getIntent(),
                 Activity.RESULT_OK);
         startActivityForResult(intent, NEXT_REQUEST);
     }
 
+    private void setupWeatherProvider() {
+        LineageSettings.Secure.putString(getContentResolver(),
+                        LineageSettings.Secure.WEATHER_PROVIDER_SERVICE, OWM);
+    }
+
+    private void setupTheme() {
+        LineageSettings.System.putInt(getContentResolver(),
+                        LineageSettings.System.BERRY_GLOBAL_STYLE, THEME);
+    }
+
     private static void handleEnableMetrics(SetupWizardApp setupWizardApp) {
-        Bundle privacyData = setupWizardApp.getSettingsBundle();
-        if (privacyData != null
-                && privacyData.containsKey(KEY_SEND_METRICS)) {
-            LineageSettings.Secure.putInt(setupWizardApp.getContentResolver(),
-                    LineageSettings.Secure.STATS_COLLECTION,
-                    privacyData.getBoolean(KEY_SEND_METRICS)
-                            ? 1 : 0);
-        }
+        LineageSettings.Secure.putInt(setupWizardApp.getContentResolver(),
+            LineageSettings.Secure.STATS_COLLECTION, 0);
     }
 
     private static void handleNavKeys(SetupWizardApp setupWizardApp) {
@@ -207,38 +226,29 @@ public class FinishActivity extends BaseSetupWizardActivity {
         }
     }
 
-    private static void handleRecoveryUpdate(SetupWizardApp setupWizardApp) {
-        if (setupWizardApp.getSettingsBundle().containsKey(ENABLE_RECOVERY_UPDATE)) {
-            boolean update = setupWizardApp.getSettingsBundle()
-                    .getBoolean(ENABLE_RECOVERY_UPDATE);
-
-            SystemProperties.set(UPDATE_RECOVERY_PROP, String.valueOf(update));
-        }
-    }
-
-    private void handleNavigationOption(Context context) {
-        Bundle settingsBundle = mSetupWizardApp.getSettingsBundle();
-        if (settingsBundle.containsKey(NAVIGATION_OPTION_KEY)) {
-            IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
-                    ServiceManager.getService(Context.OVERLAY_SERVICE));
-            String selectedNavMode = settingsBundle.getString(NAVIGATION_OPTION_KEY);
-
-            try {
-                overlayManager.setEnabledExclusiveInCategory(selectedNavMode, USER_CURRENT);
-            } catch (Exception e) {}
-        }
-    }
-
     private static void writeDisableNavkeysOption(Context context, boolean enabled) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         final boolean virtualKeysEnabled = LineageSettings.System.getIntForUser(
-                context.getContentResolver(), LineageSettings.System.FORCE_SHOW_NAVBAR, 0,
-                UserHandle.USER_CURRENT) != 0;
+                    context.getContentResolver(), LineageSettings.System.FORCE_SHOW_NAVBAR, 0,
+                    UserHandle.USER_CURRENT) != 0;
         if (enabled != virtualKeysEnabled) {
             LineageSettings.System.putIntForUser(context.getContentResolver(),
                     LineageSettings.System.FORCE_SHOW_NAVBAR, enabled ? 1 : 0,
                     UserHandle.USER_CURRENT);
+        }
+
+        /* Save/restore button timeouts to disable them in softkey mode */
+        if (enabled) {
+            LineageSettings.Secure.putInt(context.getContentResolver(),
+                    LineageSettings.Secure.BUTTON_BRIGHTNESS, 0);
+        } else {
+            int currentBrightness = LineageSettings.Secure.getInt(context.getContentResolver(),
+                    LineageSettings.Secure.BUTTON_BRIGHTNESS, 100);
+            int oldBright = prefs.getInt(KEY_BUTTON_BACKLIGHT,
+                    currentBrightness);
+            LineageSettings.Secure.putInt(context.getContentResolver(),
+                    LineageSettings.Secure.BUTTON_BRIGHTNESS, oldBright);
         }
     }
 }

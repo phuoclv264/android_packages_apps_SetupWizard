@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The CyanogenMod Project
- * Copyright (C) 2017-2021 The LineageOS Project
+ * Copyright (C) 2017-2018,2020 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,42 +20,36 @@ package org.lineageos.setupwizard;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
-import com.google.android.setupcompat.template.FooterButtonStyleUtils;
-import com.google.android.setupcompat.util.SystemBarHelper;
+import org.lineageos.setupwizard.util.EnableAccessibilityController;
 
 public class WelcomeActivity extends BaseSetupWizardActivity {
 
     public static final String TAG = WelcomeActivity.class.getSimpleName();
 
     private View mRootView;
+    private EnableAccessibilityController mEnableAccessibilityController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SystemBarHelper.setBackButtonVisible(getWindow(), false);
-        mRootView = findViewById(R.id.setup_wizard_layout);
-        setNextText(R.string.start);
-        setSkipText(R.string.emergency_call);
-        Button startButton = findViewById(R.id.start);
-        Button emergButton = findViewById(R.id.emerg_dialer);
-        startButton.setOnClickListener(view -> onNextPressed());
-        emergButton.setOnClickListener(view -> startEmergencyDialer());
-        findViewById(R.id.launch_accessibility)
-                .setOnClickListener(view -> startAccessibilitySettings());
+        mRootView = findViewById(R.id.root);
+        setNextText(R.string.next);
+        setBackText(R.string.emergency_call);
+        setBackDrawable(null);
+        mEnableAccessibilityController =
+                EnableAccessibilityController.getInstance(getApplicationContext());
+        mRootView.setOnTouchListener((v, event) ->
+                mEnableAccessibilityController.onTouchEvent(event));
 
-        FooterButtonStyleUtils.applyPrimaryButtonPartnerResource(this, startButton, true);
-        FooterButtonStyleUtils.applySecondaryButtonPartnerResource(this, emergButton, true);
-
-        TextView welcomeTitle = findViewById(R.id.welcome_title);
-        welcomeTitle.setText(getString(R.string.setup_welcome_message,
-                getString(R.string.os_name)));
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed() {}
+
+    @Override
+    public void onNavigateBack() {
+        startEmergencyDialer();
     }
 
     @Override

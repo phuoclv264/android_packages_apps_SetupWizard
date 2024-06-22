@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The CyanogenMod Project
- *               2017-2022 The LineageOS Project
+ * Copyright (C) 2017-2020 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,14 @@ import static org.lineageos.setupwizard.SetupWizardApp.REQUEST_CODE_SETUP_LOCKSC
 
 import android.app.KeyguardManager;
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import org.lineageos.setupwizard.util.SetupWizardUtils;
 
 public class ScreenLockActivity extends SubBaseActivity {
 
     public static final String TAG = ScreenLockActivity.class.getSimpleName();
-
-    @Override
-    protected void onNextPressed() {
-        launchLockscreenSetup();
-    }
 
     @Override
     protected void onStartSubactivity() {
@@ -47,8 +42,13 @@ public class ScreenLockActivity extends SubBaseActivity {
             finish();
             return;
         }
-        getGlifLayout().setDescriptionText(getString(R.string.lockscreen_setup_summary));
         setNextAllowed(true);
+        findViewById(R.id.setup_lockscreen).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchLockscreenSetup();
+            }
+        });
     }
 
     @Override
@@ -72,6 +72,7 @@ public class ScreenLockActivity extends SubBaseActivity {
                 getString(R.string.settings_lockscreen_setup_title));
         intent.putExtra(EXTRA_DETAILS,
                 getString(R.string.settings_lockscreen_setup_details));
+        intent.putExtra(SetupWizardApp.EXTRA_ALLOW_SKIP, true);
         startSubactivity(intent, REQUEST_CODE_SETUP_LOCKSCREEN);
     }
 

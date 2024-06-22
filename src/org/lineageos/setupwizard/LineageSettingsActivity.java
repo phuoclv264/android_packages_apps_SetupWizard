@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The CyanogenMod Project
- *               2017-2020,2022 The LineageOS Project
+ * Copyright (C) 2017-2020 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -33,11 +34,15 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
+import android.view.IWindowManager;
 import android.view.View;
+import android.view.WindowManagerGlobal;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.google.android.setupcompat.util.WizardManagerHelper;
+
+import org.lineageos.setupwizard.R;
 
 import lineageos.hardware.LineageHardwareManager;
 import lineageos.providers.LineageSettings;
@@ -46,7 +51,7 @@ public class LineageSettingsActivity extends BaseSetupWizardActivity {
 
     public static final String TAG = LineageSettingsActivity.class.getSimpleName();
 
-    public static final String PRIVACY_POLICY_URI = "https://lineageos.org/legal";
+    public static final String PRIVACY_POLICY_URI = "http://lineageos.org/legal";
 
     private SetupWizardApp mSetupWizardApp;
 
@@ -55,13 +60,13 @@ public class LineageSettingsActivity extends BaseSetupWizardActivity {
 
     private boolean mSupportsKeyDisabler = false;
 
-    private final View.OnClickListener mMetricsClickListener = view -> {
+    private View.OnClickListener mMetricsClickListener = view -> {
         boolean checked = !mMetrics.isChecked();
         mMetrics.setChecked(checked);
         mSetupWizardApp.getSettingsBundle().putBoolean(KEY_SEND_METRICS, checked);
     };
 
-    private final View.OnClickListener mNavKeysClickListener = view -> {
+    private View.OnClickListener mNavKeysClickListener = view -> {
         boolean checked = !mNavKeys.isChecked();
         mNavKeys.setChecked(checked);
         mSetupWizardApp.getSettingsBundle().putBoolean(DISABLE_NAV_KEYS, checked);
@@ -72,21 +77,36 @@ public class LineageSettingsActivity extends BaseSetupWizardActivity {
         super.onCreate(savedInstanceState);
         mSetupWizardApp = (SetupWizardApp) getApplication();
         setNextText(R.string.next);
-
-        String os_name = getString(R.string.os_name);
-        String privacyPolicy = getString(R.string.services_pp_explanation, os_name);
-        String policySummary = getString(R.string.services_find_privacy_policy, PRIVACY_POLICY_URI);
-        String servicesFullDescription = getString(R.string.services_full_description,
-                privacyPolicy, policySummary);
-        getGlifLayout().setDescriptionText(servicesFullDescription);
+        String privacy_policy = getString(R.string.services_privacy_policy);
+        String policySummary = getString(R.string.services_explanation, privacy_policy);
+        SpannableString ss = new SpannableString(policySummary);
+        ClickableSpan clickableSpan = new ClickableSpan() {
+            @Override
+            public void onClick(View textView) {
+                // At this point of the setup, the device has already been unlocked (if frp
+                // had been enabled), so there should be no issues regarding security
+                final Intent intent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse(PRIVACY_POLICY_URI));
+                try {
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Log.e(TAG, "Unable to start activity " + intent.toString(), e);
+                }
+            }
+        };
+        ss.setSpan(clickableSpan,
+                policySummary.length() - privacy_policy.length() - 1,
+                policySummary.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        TextView privacyPolicy = (TextView) findViewById(R.id.privacy_policy);
+        privacyPolicy.setMovementMethod(LinkMovementMethod.getInstance());
+        privacyPolicy.setText(ss);
 
         View metricsRow = findViewById(R.id.metrics);
         metricsRow.setOnClickListener(mMetricsClickListener);
-        metricsRow.requestFocus();
         String metricsHelpImproveLineage =
-                getString(R.string.services_help_improve_cm, os_name);
+                getString(R.string.services_help_improve_cm, getString(R.string.os_name));
         String metricsSummary = getString(R.string.services_metrics_label,
-                metricsHelpImproveLineage, os_name, os_name);
+                metricsHelpImproveLineage, getString(R.string.os_name));
         final SpannableStringBuilder metricsSpan = new SpannableStringBuilder(metricsSummary);
         metricsSpan.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
                 0, metricsHelpImproveLineage.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
